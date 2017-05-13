@@ -24,7 +24,7 @@ python2 -m door
 
 - **Server**
 
-  Server je aplikacija koja pusta zvuk na glavnom racunaru. Zvuk se na osnovu parametara (mape <frekvencija> <amplituda> i duzine trajanja) klijenta generise na serveru i pusta zvuk.
+  Server je aplikacija koja pusta zvuk na glavnom racunaru. Zvuk se na osnovu parametara (mape \<frekvencija\> \<amplituda\> i duzine trajanja) klijenta generise na serveru i pusta zvuk.
 
   - implementiran Flask server koji na zahtev pusta zvuk zadate frekvencije (trenutno fiksirano 1000Hz) i zadate duzine (1s)
 - **Klijent**
