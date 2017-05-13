@@ -11,3 +11,7 @@ pip2 install git+https://github.com/MilicaSelakovic/door
 ```
 python2 -m door
 ```
+
+## Samo za Andjelku :)
+
+Opis...
