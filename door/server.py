@@ -3,7 +3,7 @@ from pyaudio import PyAudio
 import math
 import threading
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./static')
 
 def play(frequency, length):
     BITRATE = 16000 #number of frames per second/frameset.
@@ -39,7 +39,19 @@ def play(frequency, length):
 def hello():
     if threading.active_count() < 2:
         threading.Thread(target=play(1000, 1)).start()
-    return "<b>Hvala na paznji!</b>"
+    return r'<b>Hvala na paznji!</b><br><a href="/audiomic.html">Vizualizacija zvuka</a>'
+
+@app.route("/audiomic.html")
+def audiomic():
+    return app.send_static_file('audiomic.html')
+
+@app.route("/audio.js")
+def audio():
+    return app.send_static_file('audio.js')
+
+@app.route("/style.css")
+def style():
+    return app.send_static_file('style.css')
 
 if __name__ == "__main__":
     app.run()
