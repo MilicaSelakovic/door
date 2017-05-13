@@ -14,4 +14,6 @@ python2 -m door
 
 ## Samo za Andjelku :)
 
-Opis...
+- **Server**
+  - implementiran Flask server koji na zahtev pusta zvuk frekvencije 1000Hz 1s
+- **Klijent**
