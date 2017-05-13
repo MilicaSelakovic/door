@@ -6,6 +6,12 @@
 pip2 install git+https://github.com/MilicaSelakovic/door
 ```
 
+## Uninstall
+
+```
+pip2 uninstall door
+```
+
 ## Run
 
 ```
