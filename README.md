@@ -5,11 +5,6 @@
 ```
 pip2 install git+https://github.com/MilicaSelakovic/door
 ```
-## Uninstall
-
-```
-pip2 uninstall door
-```
 
 ## Run
 
@@ -18,7 +13,7 @@ python2 -m door
 ```
 
 ## Samo za Andjelku :)
-
+  Kratka prica o proveri akusticnosti sobe:
   http://www.techmuzeacademy.com/simple-ways-to-test-your-rooms-frequency-response
 
 - **Server**
@@ -39,4 +34,4 @@ python2 -m door
     Za Android smo pronasli bibloteku Minim preko koje mozemo da odradimo spektralnu analizu ulaza sa mikrofona. Nije jos nista implementirano.
   - Web klijent
     Treca ideja je da klijentska aplikacija bude web aplikacija. U browser-u se crta spektrogram ulaza sa mikrofona.
-    
+    Link za sajt se dobija po pokretanju servera.
