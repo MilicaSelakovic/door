@@ -25,13 +25,15 @@ python2 -m door
   Takodje klijentska aplikacija bi davala poruku da li se pri pomeranju uredjaja dobijaju bolji rezultati ili losiji u odnosu na prethodnu poziciju.
   - IOS
     Aplikacija koja prima zvuk sa mikrofona, racuna FFT ulaza i crta spektrogram.
-    Problem: Biblioteka koju smo nasli ne dozvoljava promene. U opsegu 20Hz do 20kHz dobijaju se amplitude 512 ekvidistantnih tacaka. Time imamo malo podataka za nize frekvencije i spektrogram izgleda lose, kao sto se moze videti na slikama.
+    Problem: Biblioteka koju smo nasli ne dozvoljava promene. U opsegu 20Hz do 20kHz dobijaju se amplitude 512 ekvidistantnih tacaka. Time imamo malo podataka za nize frekvencije i spektrogram izgleda lose, kao sto se moze videti na slikama (crta se logaritamska skala).
 
     [![Slika1.png](https://s24.postimg.org/sucihik5h/Screen_Shot_2017-05-13_at_13.44.49.png)](https://postimg.org/image/cjcel77nl/)
     [![Slika2.png](https://s24.postimg.org/z9bje6qv9/Screen_Shot_2017-05-13_at_13.45.00.png)](https://postimg.org/image/kq4ecrxq9/)
     [![Slika3.png](https://s24.postimg.org/ve85bm7ph/Screen_Shot_2017-05-13_at_13.45.05.png)](https://postimg.org/image/hkjsmkf41/)
   - Android
+  
     Za Android smo pronasli bibloteku Minim preko koje mozemo da odradimo spektralnu analizu ulaza sa mikrofona. Nije jos nista implementirano.
   - Web klijent
+  
     Treca ideja je da klijentska aplikacija bude web aplikacija. U browser-u se crta spektrogram ulaza sa mikrofona.
     Link za sajt se dobija po pokretanju servera.
