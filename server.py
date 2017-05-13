@@ -16,11 +16,11 @@ def play(frequency, length):
     RESTFRAMES = NUMBEROFFRAMES % BITRATE
     WAVEDATA = ''
 
-    for x in xrange(NUMBEROFFRAMES):
+    for x in range(NUMBEROFFRAMES):
        WAVEDATA += chr(int(math.sin(x / ((BITRATE / FREQUENCY) / math.pi)) * 127 + 128))
 
     #fill remainder of frameset with silence
-    for x in xrange(RESTFRAMES):
+    for x in range(RESTFRAMES):
         WAVEDATA += chr(128)
 
     p = PyAudio()
@@ -39,7 +39,7 @@ def play(frequency, length):
 def hello():
     if threading.active_count() < 2:
         threading.Thread(target=play(1000, 1)).start()
-    return "Hvala na paznji!"
+    return "<b>Hvala na paznji!</b>"
 
 if __name__ == "__main__":
     app.run()
