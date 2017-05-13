@@ -17,10 +17,12 @@ python2 -m door
   http://www.techmuzeacademy.com/simple-ways-to-test-your-rooms-frequency-response
 
 - **Server**
+
   Server je aplikacija koja pusta zvuk na glavnom racunaru. Zvuk se na osnovu parametara (mape <frekvencija> <amplituda> i duzine trajanja) klijenta generise na serveru i pusta zvuk.
 
   - implementiran Flask server koji na zahtev pusta zvuk zadate frekvencije (trenutno fiksirano 1000Hz) i zadate duzine (1s)
 - **Klijent**
+
   Klijent je aplikacija koja "slusa" zvuk. Klijentska aplikacija crta dva spektrograma, prvi spektrogram zvuk koji server pusta a drugi je spektrogram zvuka koji klijentska aplikacija "cuje".
   Takodje klijentska aplikacija bi davala poruku da li se pri pomeranju uredjaja dobijaju bolji rezultati ili losiji u odnosu na prethodnu poziciju.
   - IOS
