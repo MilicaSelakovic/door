@@ -8,7 +8,7 @@ var Visualizer = function() {
         this.animationId = null;
 
         this.allCapsReachBottom = false;
-        this.gain_node = null;
+        // this.gain_node = null;
 };
 Visualizer.prototype = {
       ini: function() {
@@ -46,40 +46,53 @@ Visualizer.prototype = {
     },
     _start_microphone: function(stream){
         var BUFF_SIZE_RENDERER = 16384;
-        this.gain_node = this.audioContext.createGain();
-        this.gain_node.gain.value = 0;
-        this.gain_node.connect( this.audioContext.destination );
+        gain_node = this.audioContext.createGain();
+        gain_node.gain.value = 0;
+        //this.gain_node.connect( this.audioContext.destination );
 
         microphone_stream = this.audioContext.createMediaStreamSource(stream);
-        microphone_stream.connect(this.gain_node);
+        //microphone_stream.connect(this.gain_node);
 
-        script_processor_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
-        script_processor_node.onaudioprocess = this.process_microphone_buffer;
+        // script_processor_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
+        // script_processor_node.onaudioprocess = this.process_microphone_buffer;
 
-        microphone_stream.connect(script_processor_node);
+        // microphone_stream.connect(script_processor_node);
 
 
         // --- setup FFT
 
-        script_processor_analysis_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
-        script_processor_analysis_node.connect(this.gain_node);
+        // script_processor_analysis_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
+        // script_processor_analysis_node.connect(this.gain_node);
 
 
         analyser_node = this.audioContext.createAnalyser();
-        analyser_node.smoothingTimeConstant = 0.5; // prelaz
+        analyser_node.smoothingTimeConstant = 0.85;
+        analyser_node.minDecibels = -90;
+        analyser_node.maxDecibels = -10;
         analyser_node.fftSize = BUFF_SIZE_RENDERER;
 
+        distortion = this.audioContext.createWaveShaper();
+        biquadFilter = this.audioContext.createBiquadFilter();
+        convolver = this.audioContext.createConvolver();
+
         microphone_stream.connect(analyser_node);
+        analyser_node.connect(distortion);
+        distortion.connect(biquadFilter);
+        biquadFilter.connect(convolver);
+        convolver.connect(gain_node);
+        gain_node.connect(this.audioContext.destination)
+        // microphone_stream.connect(analyser_node);
 
-        analyser_node.connect(script_processor_analysis_node);
+        // analyser_node.connect(script_processor_analysis_node);
 
-        var that = this;
-
-        script_processor_analysis_node.onaudioprocess = function() {
-            if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
-                    that._drawSpectrum(analyser_node)
-            }
-        };
+        this._drawSpectrum(analyser_node)
+        // var that = this;
+        //
+        // script_processor_analysis_node.onaudioprocess = function() {
+        //     if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
+        //             that._drawSpectrum(analyser_node)
+        //     }
+        // };
 },
     _drawSpectrum: function(analyser) {
         var that = this,
