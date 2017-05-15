@@ -9,16 +9,6 @@ var Visualizer = function() {
 
         this.allCapsReachBottom = false;
 
-
-
-
-        this.audioInput = null,
-        this.microphone_stream = null,
-        this.gain_node = null,
-        this.script_processor_node = null,
-        this.script_processor_analysis_node = null,
-        this.analyser_node = null;
-
 };
 Visualizer.prototype = {
         ini: function() {
