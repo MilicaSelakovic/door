@@ -8,49 +8,50 @@ var Visualizer = function() {
         this.animationId = null;
 
         this.allCapsReachBottom = false;
-
+        this.gain_node = null;
 };
 Visualizer.prototype = {
-        ini: function() {
+      ini: function() {
         this._prepareAPI();
         // this._addEventListner();
-        },
-        _prepareAPI: function() {
-        //fix browser vender for AudioContext and requestAnimationFrame
-        window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
-        window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
-        window.cancelAnimationFrame = window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame || window.msCancelAnimationFrame;
-        try {
-            this.audioContext = new AudioContext();
-        } catch (e) {
-            this._updateInfo('!Your browser does not support AudioContext', false);
-            console.log(e);
-        }
+      },
+      _prepareAPI: function() {
+          //fix browser vender for AudioContext and requestAnimationFrame
+          window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+          window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
+          window.cancelAnimationFrame = window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame || window.msCancelAnimationFrame;
+          try {
+              this.audioContext = new AudioContext();
+          } catch (e) {
+              this._updateInfo('!Your browser does not support AudioContext', false);
+              console.log(e);
+          }
 
-        if (!navigator.getUserMedia)
-            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-        var that = this;
-        if (navigator.getUserMedia){
+          if (!navigator.getUserMedia)
+              navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+          var that = this;
+          if (navigator.getUserMedia){
 
-            navigator.getUserMedia({audio:true, video:false},
-                function(stream) {
-                        that._start_microphone(stream);
-                },
-                function(e) {
-                    window.alert('Error capturing audio.');
-                }
-                );
+              navigator.getUserMedia({audio:true, video:false},
+                  function(stream) {
+                          that._start_microphone(stream);
+                  },
+                  function(e) {
+                      window.alert('Error capturing audio.');
+                  }
+                  );
 
-        } else { window.alert('getUserMedia not supported in this browser.'); }
+          } else { window.alert('getUserMedia not supported in this browser.'); }
 
     },
     _start_microphone: function(stream){
         var BUFF_SIZE_RENDERER = 16384;
-        gain_node = this.audioContext.createGain();
-        gain_node.connect( this.audioContext.destination );
+        this.gain_node = this.audioContext.createGain();
+        this.gain_node.gain.value = 0;
+        this.gain_node.connect( this.audioContext.destination );
 
         microphone_stream = this.audioContext.createMediaStreamSource(stream);
-        microphone_stream.connect(gain_node);
+        microphone_stream.connect(this.gain_node);
 
         script_processor_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
         script_processor_node.onaudioprocess = this.process_microphone_buffer;
@@ -61,10 +62,11 @@ Visualizer.prototype = {
         // --- setup FFT
 
         script_processor_analysis_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
-        script_processor_analysis_node.connect(gain_node);
+        script_processor_analysis_node.connect(this.gain_node);
+
 
         analyser_node = this.audioContext.createAnalyser();
-        analyser_node.smoothingTimeConstant = 0.8; // prelaz
+        analyser_node.smoothingTimeConstant = 0.5; // prelaz
         analyser_node.fftSize = BUFF_SIZE_RENDERER;
 
         microphone_stream.connect(analyser_node);
@@ -172,7 +174,7 @@ Visualizer.prototype = {
       // TODO dodati filtere ovde
     var i, N, inp, microphone_output_buffer;
 
-    microphone_output_buffer = event.inputBuffer.getChannelData(1); // just mono - 1 channel for now
+    microphone_output_buffer = event.inputBuffer; // just mono - 1 channel for now
 },
 
 }
