@@ -32,7 +32,7 @@ Visualizer.prototype = {
         var that = this;
         if (navigator.getUserMedia){
 
-            navigator.getUserMedia({audio:true},
+            navigator.getUserMedia({audio:true, video:false},
                 function(stream) {
                         that._start_microphone(stream);
                 },
@@ -60,12 +60,12 @@ Visualizer.prototype = {
 
         // --- setup FFT
 
-        script_processor_analysis_node = this.audioContext.createScriptProcessor(4096, 1, 1);
+        script_processor_analysis_node = this.audioContext.createScriptProcessor(BUFF_SIZE_RENDERER, 1, 1);
         script_processor_analysis_node.connect(gain_node);
 
         analyser_node = this.audioContext.createAnalyser();
-        analyser_node.smoothingTimeConstant = 0;
-        analyser_node.fftSize = 4096;
+        analyser_node.smoothingTimeConstant = 0.8; // prelaz
+        analyser_node.fftSize = BUFF_SIZE_RENDERER;
 
         microphone_stream.connect(analyser_node);
 
@@ -169,10 +169,10 @@ Visualizer.prototype = {
         };
     },
     process_microphone_buffer: function (event) {
-
+      // TODO dodati filtere ovde
     var i, N, inp, microphone_output_buffer;
 
-    microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
+    microphone_output_buffer = event.inputBuffer.getChannelData(1); // just mono - 1 channel for now
 },
 
 }
