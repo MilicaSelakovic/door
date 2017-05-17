@@ -38,7 +38,7 @@ def play(frequency, length):
 @app.route("/")
 def hello():
     if threading.active_count() < 2:
-        threading.Thread(target=play(1000, 1)).start()
+        threading.Thread(target=play(1000, 0.01)).start()
     return r'<b>Hvala na paznji!</b><br><a href="/audiomic.html">Vizualizacija zvuka</a>'
 
 @app.route("/audiomic.html")
