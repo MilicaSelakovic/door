@@ -53,5 +53,21 @@ def audio():
 def style():
     return app.send_static_file('style.css')
 
+@app.route("/scripts/main.js")
+def main_js():
+    return app.send_static_file('scripts/main.js')
+
+@app.route("/scripts/vendor.js")
+def vendor_js():
+    return app.send_static_file('scripts/vendor.js')
+
+@app.route("/styles/main.css")
+def main_css():
+    return app.send_static_file('styles/main.css')
+
+@app.route("/app.html")
+def app_html():
+    return app.send_static_file('index.html')
+
 if __name__ == "__main__":
     app.run()

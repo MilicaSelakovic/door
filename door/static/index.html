@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>front</title>
+
+    <script src="http://d3js.org/d3.v3.js" language="JavaScript"></script>
+    <!-- Place favicon.ico in the root directory -->
+
+    
+
+    <link rel="stylesheet" href="styles/main.css">
+
+  </head>
+  <body>
+    <!--[if lt IE 10]>
+      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div class="app">
+      <div class="chart">
+        <canvas id="myChart" width="100" height="100"></canvas>
+      </div>
+      <div class="gauge low">
+        <svg id="fillgauge1" width="100%" height="100%" onclick="gauge1.update(NewValue());"></svg>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="slider">
+        <!--<input type="range">-->
+        <div id="slider"></div>
+      </div>
+      <div class="main-controls">
+        <div class="half">
+          <div class="play"></div>
+        </div>
+        <div class="half">
+          <label class="switch">
+            <input type="checkbox" onclick="switchMode()">
+            <div class="switch-slider"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="scripts/vendor.js"></script>
+
+    <script src="scripts/main.js"></script>
+
+  </body>
+</html>
