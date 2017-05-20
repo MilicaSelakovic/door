@@ -11,7 +11,6 @@ setup(
     description='class project',
     install_requires=[
         'flask',
-        'audiogen',
         'pyaudio'
     ],
     entry_points='''
