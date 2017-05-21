@@ -605,10 +605,7 @@ Visualizer.prototype = {
     $.get("/fftNoise", function (data) {
       var dataS = new Array(data.length);
       for (var i = 0; i < data.length; i++) {
-        dataS[i] = { x: i * 100 };
-      }
-      for (var i = 0; i < data.length; i++) {
-        dataS[i].y = data[i];
+        dataS[i] = { x: data[i][0], y: data[i][1] };
       }
 
       scatterChart.data.datasets[1].data = dataS;

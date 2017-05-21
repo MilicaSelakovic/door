@@ -70,15 +70,16 @@ class Noise:
 
         ff = np.fft.fft(array)
         freq = np.fft.fftfreq(len(ff))
+        ff += 0.00001 # da ne bi bio log od 0
         ffDec = 20*np.log10(np.abs(ff[0:ff.shape[0]//2]))
         ffDec -= np.max(ffDec)
         freq = freq[0:len(freq)//2]
-        result = dict(zip(freq, ffDec));
+        result = dict(zip(freq.tolist(), ffDec.tolist()));
         return result
 
     def setStart(self, value):
         self.start = value
-        
+
     def close(self):
         self.stream.close()
         self.p.terminate()
@@ -127,7 +128,7 @@ def freq():
 def fftNoise():
     if request.method == 'GET':
         result = noise.fft()
-        return '[1, 2, 3]'#json.dumps(result);
+        return json.dumps(result);
 
 @app.route('/startNoise')
 def startNoise():
