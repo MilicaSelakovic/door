@@ -6,12 +6,18 @@ from pyaudio import PyAudio
 import math
 import multiprocessing
 import threading
+import struct
+import numpy as np
 
 app = Flask(__name__, static_folder='./static')
+
+lock = multiprocessing.Lock()
 
 class Noise:
     chunk = 1024
     start = False
+    # start = multiprocessing.Value('i', 0);
+
 
     def __init__(self):
         """Init noise"""
@@ -23,32 +29,56 @@ class Noise:
             rate = self.wf.getframerate(),
             output = True
         )
+        # self.process = multiprocessing.Process(self.play())
+        # self.process.start()
+
 
     def play(self):
-        while True:
+        # i = 0;
+        if self.start :
             self.data = self.wf.readframes(self.chunk)
             if self.data == '':
                 self.wf.rewind()
                 self.data = self.wf.readframes(self.CHUNK)
             self.stream.write(self.data)
 
+    def wav2array(self, nchannels, sampwidth, data):
+        """data must be the string containing the bytes from the wav file."""
+        num_samples, remainder = divmod(len(data), sampwidth * nchannels)
+        if remainder > 0:
+            raise ValueError('The length of data is not a multiple of '
+                            'sampwidth * num_channels.')
+        if sampwidth > 4:
+            raise ValueError("sampwidth must not be greater than 4.")
+
+        if sampwidth == 3:
+            a = np.empty((num_samples, nchannels, 4), dtype=np.uint8)
+            raw_bytes = np.fromstring(data, dtype=np.uint8)
+            a[:, :, :sampwidth] = raw_bytes.reshape(-1, nchannels, sampwidth)
+            a[:, :, sampwidth:] = (a[:, :, sampwidth - 1:sampwidth] >> 7) * 255
+            result = a.view('<i4').reshape(a.shape[:-1])
+        else:
+            # 8 bit samples are stored as unsigned ints; others as signed ints.
+            dt_char = 'u' if sampwidth == 1 else 'i'
+            a = np.fromstring(data, dtype='<%s%d' % (dt_char, sampwidth))
+            result = a.reshape(-1, nchannels)
+        return result
+
     def fft(self):
-        # TODO  1. predji na procese 2.uraditi fft imas primer kod Andjelke, proveri samo da li ova data ima i vise nego sto treba
-        print("krava")
-        # print(self.data)
+        self.play()
+        array = self.wav2array(self.wf.getnchannels(), self.wf.getsampwidth(), self.data)
+
+        ff = np.fft.fft(array)
+        freq = np.fft.fftfreq(len(ff))
+        ffDec = 20*np.log10(np.abs(ff[0:ff.shape[0]//2]))
+        ffDec -= np.max(ffDec)
+        freq = freq[0:len(freq)//2]
+        result = dict(zip(freq, ffDec));
+        return result
 
     def setStart(self, value):
-        print(value)
-        if value:
-            print("ukljuci")
-            # TODO ovo pod komentarom radi
-            # self.procces = multiprocessing.Process(self.play())
-            # self.procces.start()
-        else:
-            print("iskljuci")
-            # TODO ovo ne radi, nadji kako da ubijes proces ili vec kako hoces da izvedes play pause
-            # self.procces.terminate()
-
+        self.start = value
+        
     def close(self):
         self.stream.close()
         self.p.terminate()
@@ -96,13 +126,11 @@ def freq():
 @app.route('/fftNoise', methods=['GET'])
 def fftNoise():
     if request.method == 'GET':
-        noise.fft()
-        # TODO vrati klijentu ono sto izracunas kao fft
-        return '[1, 2, 3]';
+        result = noise.fft()
+        return '[1, 2, 3]'#json.dumps(result);
 
 @app.route('/startNoise')
 def startNoise():
-    #TODO start sledeci je stop
     noise.setStart(True)
     return ""
 
