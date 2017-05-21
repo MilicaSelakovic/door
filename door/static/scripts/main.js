@@ -247,30 +247,35 @@ function loadLiquidFillGauge(elementId, value, config) {
 }
 //# sourceMappingURL=liquid.js.map
 
-"use strict";
+'use strict';
+
+function setWaterColor(value) {
+  var water = $('.gauge');
+  for (var i = 1; i <= 100; i++) {
+    water.removeClass('color-' + i);
+  }
+  water.addClass("color-" + value);
+}
 
 var config1 = liquidFillGaugeDefaultSettings();
 config1.circleThickness = 0.1;
+config1.circleFillGap = 0;
 config1.waveAnimateTime = 500;
 config1.waveRiseTime = 100;
 config1.colorsCss = true;
 config1.displayPercent = false;
 var gauge1 = loadLiquidFillGauge("fillgauge1", 55, config1);
-var value = 50;
-//      setInterval(()=>{
-//          value = (value + ((Math.random() > .5)?1:-1)) % 100;
-//          if(value > 60){
-//              config1.textColor = "#2eff59"
-//          }
-//          gauge1.update(value);
-//      },100);
+setWaterColor(55);
 
 function NewValue() {
+  var res;
   if (Math.random() > .5) {
-    return Math.round(Math.random() * 100);
+    res = Math.round(Math.random() * 100);
   } else {
-    return (Math.random() * 100).toFixed(1);
+    res = (Math.random() * 100).toFixed(1);
   }
+  setWaterColor(Math.round(res));
+  return res;
 }
 //# sourceMappingURL=liquidConfig.js.map
 
@@ -308,6 +313,15 @@ var scatterChart = new Chart(ctx, {
       pointHoverBorderColor: "rgba(0,0,0,0)",
       borderWidth: "2",
       data: data1
+    }, {
+      fill: false,
+      borderColor: "#0956a2",
+      pointBorderColor: "rgba(0,0,0,0)",
+      pointBackgroundColor: "rgba(0,0,0,0)",
+      pointHoverBackgroundColor: "rgba(0,0,0,0)",
+      pointHoverBorderColor: "rgba(0,0,0,0)",
+      borderWidth: "2",
+      data: []
     }]
   },
   options: {
@@ -320,7 +334,7 @@ var scatterChart = new Chart(ctx, {
       enabled: false
     },
     animation: {
-      duration: 100
+      duration: 50
     },
     scales: {
       yAxes: [{
@@ -329,30 +343,30 @@ var scatterChart = new Chart(ctx, {
         scaleShowLabels: false,
         ticks: {
           min: -130,
-          max: 0
+          max: 20
         },
         gridLines: {
-          display: false,
-          drawBorder: false
+          display: true,
+          drawBorder: true
         }
       }, {
         display: dysplayYAxis,
         position: 'right',
         ticks: {
           min: -130,
-          max: 0
+          max: 20
         },
         gridLines: {
-          display: false,
-          drawBorder: false
+          display: true,
+          drawBorder: true
         }
       }],
       xAxes: [{
         type: 'logarithmic',
         position: 'bottom',
         gridLines: {
-          display: false,
-          drawBorder: false
+          display: true,
+          drawBorder: true
         },
         ticks: {
           min: 10,
@@ -398,8 +412,8 @@ var Visualizer = function Visualizer() {
   this.timer1 = null;
 
   this.analyser = null;
-
-  this.id = 0;
+  this.gain_node = null;
+  this.noiseTimer = null;
 };
 Visualizer.prototype = {
   ini: function ini() {
@@ -431,8 +445,8 @@ Visualizer.prototype = {
   },
   _start_microphone: function _start_microphone(stream) {
     var BUFF_SIZE_RENDERER = 16384;
-    var gain_node = this.audioContext.createGain();
-    gain_node.gain.value = 0; // postavljen na 0 jer ne treba da pusta zvuk
+    this.gain_node = this.audioContext.createGain();
+    this.gain_node.gain.value = 0; // postavljen na 0 jer ne treba da pusta zvuk
 
     var microphone_stream = this.audioContext.createMediaStreamSource(stream);
 
@@ -443,32 +457,20 @@ Visualizer.prototype = {
     analyser_node.fftSize = BUFF_SIZE_RENDERER;
 
     this.analyser = analyser_node;
-    // var distortion = this.audioContext.createWaveShaper();
-    // var biquadFilter = this.audioContext.createBiquadFilter();
-    // var convolver = this.audioContext.createConvolver();
 
     microphone_stream.connect(analyser_node);
-    // microphone_stream.connect(convolver);
-    // convolver.connect(analyser_node);
-    //
-    analyser_node.connect(gain_node);
-    // analyser_node.connect(distortion);
-    // distortion.connect(gain_node)
-    // distortion.connect(biquadFilter);
-    // biquadFilter.connect(convolver);
-    // convolver.connect(gain_node);
-    gain_node.connect(this.audioContext.destination);
+
+    analyser_node.connect(this.gain_node);
+
+    this.gain_node.connect(this.audioContext.destination);
 
     this._drawSpectrum(analyser_node);
   },
   _drawSpectrum: function _drawSpectrum(analyser) {
-    analyser.smoothingTimeConstant = 0.85;
+    analyser.smoothingTimeConstant = 0.9;
     analyser.fftSize = 4096;
-    // canvas = document.getElementById('canvas');
-    // cwidth = canvas.width;
-    // cheight = canvas.height - 2;
-    // canvasCtx = canvas.getContext('2d');
-    var bufferLength = analyser.frequencyBinCount;
+
+    var bufferLength = analyser.frequencyBinCount - 250;
     var dataArray = new Float32Array(bufferLength);
     var data = new Array(bufferLength);
     for (var i = 0, j = 0; i < bufferLength; j++) {
@@ -476,16 +478,11 @@ Visualizer.prototype = {
       i += Math.floor(i / 50) + 1;
     }
 
-    console.log(dataArray);
-
-    // canvasCtx.clearRect(0, 0, cwidth, cheight);
     var that = this;
     function draw() {
       var drawVisual = requestAnimationFrame(draw);
       analyser.getFloatFrequencyData(dataArray);
-      //  that.clarty(analyser)
-      // canvasCtx.fillStyle = 'rgb(0, 0, 0)';
-      // canvasCtx.fillRect(0, 0, cwidth, cheight);
+
       for (var i = 0, j = 0; i < bufferLength; j++) {
         data[j].y = dataArray[i];
         i += Math.floor(i / 50) + 1;
@@ -493,26 +490,10 @@ Visualizer.prototype = {
 
       scatterChart.data.datasets[0].data = data;
       scatterChart.update();
-
-      // console.log('asd');
-
-      // var barWidth = (cwidth / bufferLength) * 2.5;
-      // var barHeight;
-      // var x = 0;
-      //
-      // for(var i = 0; i < bufferLength; i++) {
-      //   barHeight = dataArray[i];
-      //
-      //   canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
-      //   canvasCtx.fillRect(x,cheight-barHeight/2,barWidth,barHeight/2);
-      //
-      //   x += barWidth + 1;
-      // }
     };
     draw();
   },
   clarty: function clarty(analyser) {
-    // console.log(this.count)
     var data = new Float32Array(analyser.frequencyBinCount);
     analyser.getFloatFrequencyData(data);
     data = data.map(function (x) {
@@ -556,7 +537,7 @@ Visualizer.prototype = {
     this.powerOfNoise += power;
   },
   _result: function _result() {
-    // console.log('radi');
+    this.analyser.smoothingTimeConstant = 0.9;
     clearInterval(this.timer);
     var c50;
     if (this.powerAfter == 0) {
@@ -574,32 +555,65 @@ Visualizer.prototype = {
       return Math.max(0, 100 - Math.round(x));
     };
     gauge1.update(value(c50));
-    console.log(c50);
-    this.id = 0;
+    setWaterColor(value(c50));
+    enablePlay();
+    // console.log(c50);
   },
   _noise: function _noise() {
-    // console.log("da");
     clearInterval(this.timer1);
     this.powerOfNoise /= this.count;
     this.count = 0;
     var that = this;
+    console.log(sliderValue());
+    $.ajax({
+      type: "GET",
+      url: "/play",
+      data: { "freq": sliderValue() }
+    });
     this.timer = setInterval(function () {
       that.clarty(that.analyser);
     }, 1);
   },
   _start: function _start() {
-    if (this.id == 0) {
-      // this._beginFreq(this.analyser);
-      $.get('http://localhost:5000');
+    if (inMode2()) {
+      this.analyser.smoothingTimeConstant = 0;
       var that = this;
       this.timer1 = setInterval(function () {
         that._noisePower(that.analyser);
       }, 1);
-      // this.timer = setInterval(function() {that.clarty(that.analyser)}, 1);
-      this.id = 1;
     } else {
-      console.log('majmune');
+      if (isActive()) {
+        this._playNoise();
+      } else {
+        this._pauseNoise();
+      }
     }
+  },
+  _playNoise: function _playNoise() {
+    var that = this;
+    $.get("/startNoise");
+    this.noiseTimer = setInterval(function () {
+      that._drawNoise();
+    }, 100);
+  },
+  _pauseNoise: function _pauseNoise() {
+    $.get("/stopNoise");
+    clearInterval(this.noiseTimer);
+  },
+  _drawNoise: function _drawNoise() {
+
+    $.get("/fftNoise", function (data) {
+      var dataS = new Array(data.length);
+      for (var i = 0; i < data.length; i++) {
+        dataS[i] = { x: i * 100 };
+      }
+      for (var i = 0; i < data.length; i++) {
+        dataS[i].y = data[i];
+      }
+
+      scatterChart.data.datasets[1].data = dataS;
+      scatterChart.update();
+    });
   }
 };
 //# sourceMappingURL=audio.js.map
@@ -610,10 +624,30 @@ function switchMode() {
   $('body').toggleClass('mode2');
 }
 
+function inMode2() {
+  return $('body').hasClass('mode2');
+}
+
+function isActive() {
+  return $('.play').hasClass('active');
+}
+
+function enablePlay() {}
+
+function disablePlay() {}
+
+function sliderValue() {
+  return $("#slider")[0].noUiSlider.get();
+}
+
 $(document).ready(function () {
   var icon = $('.play');
   icon.click(function () {
-    icon.toggleClass('active');
+    if (!inMode2()) {
+      icon.toggleClass('active');
+    } else {
+      disablePlay();
+    }
     v._start();
     return false;
   });

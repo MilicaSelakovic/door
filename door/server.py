@@ -1,16 +1,65 @@
 from flask import Flask
+from flask import request
+import json
+import wave
 from pyaudio import PyAudio
 import math
+import multiprocessing
 import threading
 
 app = Flask(__name__, static_folder='./static')
 
-def play(frequency, length):
-    BITRATE = 16000 #number of frames per second/frameset.
+class Noise:
+    chunk = 1024
+    start = False
 
-    #See http://www.phy.mtu.edu/~suits/notefreqs.html
-    FREQUENCY = frequency #Hz, waves per second, 261.63=C4-note.
-    LENGTH = length #seconds to play sound
+    def __init__(self):
+        """Init noise"""
+        self.wf = wave.open("noise/noise.wav", 'rb');
+        self.p = PyAudio()
+        self.stream = self.p.open(
+            format = self.p.get_format_from_width(self.wf.getsampwidth()),
+            channels = self.wf.getnchannels(),
+            rate = self.wf.getframerate(),
+            output = True
+        )
+
+    def play(self):
+        while True:
+            self.data = self.wf.readframes(self.chunk)
+            if self.data == '':
+                self.wf.rewind()
+                self.data = self.wf.readframes(self.CHUNK)
+            self.stream.write(self.data)
+
+    def fft(self):
+        # TODO  1. predji na procese 2.uraditi fft imas primer kod Andjelke, proveri samo da li ova data ima i vise nego sto treba
+        print("krava")
+        # print(self.data)
+
+    def setStart(self, value):
+        print(value)
+        if value:
+            print("ukljuci")
+            # TODO ovo pod komentarom radi
+            # self.procces = multiprocessing.Process(self.play())
+            # self.procces.start()
+        else:
+            print("iskljuci")
+            # TODO ovo ne radi, nadji kako da ubijes proces ili vec kako hoces da izvedes play pause
+            # self.procces.terminate()
+
+    def close(self):
+        self.stream.close()
+        self.p.terminate()
+
+def play(frequency, length):
+    print(frequency);
+    frequency = float(frequency);
+    BITRATE = 16000
+
+    FREQUENCY = frequency
+    LENGTH = length
 
     NUMBEROFFRAMES = int(BITRATE * LENGTH)
     RESTFRAMES = NUMBEROFFRAMES % BITRATE
@@ -35,11 +84,33 @@ def play(frequency, length):
     stream.close()
     p.terminate()
 
-@app.route("/")
-def hello():
-    if threading.active_count() < 2:
-        threading.Thread(target=play(1000, 0.01)).start()
-    return r'<b>Hvala na paznji!</b><br><a href="/audiomic.html">Vizualizacija zvuka</a>'
+noise = Noise()
+
+@app.route('/play', methods=['GET', 'POST'])
+def freq():
+    if request.method == 'GET':
+        if threading.active_count() < 2:
+            threading.Thread(target=play(request.args['freq'], 0.01)).start()
+    return "Zdravo"
+
+@app.route('/fftNoise', methods=['GET'])
+def fftNoise():
+    if request.method == 'GET':
+        noise.fft()
+        # TODO vrati klijentu ono sto izracunas kao fft
+        return '[1, 2, 3]';
+
+@app.route('/startNoise')
+def startNoise():
+    #TODO start sledeci je stop
+    noise.setStart(True)
+    return ""
+
+@app.route('/stopNoise')
+def stopNoise():
+    noise.setStart(False)
+    return ""
+
 
 @app.route("/audiomic.html")
 def audiomic():
