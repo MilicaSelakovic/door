@@ -603,11 +603,21 @@ Visualizer.prototype = {
   _drawNoise: function _drawNoise() {
 
     $.get("/fftNoise", function (data) {
+      var json = JSON.parse(data);
       var dataS = new Array(data.length);
-      for (var i = 0; i < data.length; i++) {
-        dataS[i] = { x: data[i][0], y: data[i][1] };
-      }
+      var i = 0;
+      var keys = [];
+      Object.keys(json).forEach(function (key) {
+        keys.push(key);
+      });
 
+      keys.sort(function (a, b) {
+        return parseFloat(a) - parseFloat(b);
+      });
+
+      for (var i = 0, n = keys.length; i < n; i++) {
+        dataS[i] = { "x": parseFloat(keys[i]), "y": json[keys[i]][0] };
+      }
       scatterChart.data.datasets[1].data = dataS;
       scatterChart.update();
     });
