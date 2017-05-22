@@ -11,7 +11,8 @@ setup(
     description='class project',
     install_requires=[
         'flask',
-        'pyaudio'
+        'pyaudio',
+        'numpy'
     ],
     entry_points='''
         [console_scripts]
