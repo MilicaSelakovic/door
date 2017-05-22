@@ -260,8 +260,8 @@ function setWaterColor(value) {
 var config1 = liquidFillGaugeDefaultSettings();
 config1.circleThickness = 0.1;
 config1.circleFillGap = 0;
-config1.waveAnimateTime = 500;
-config1.waveRiseTime = 100;
+config1.waveAnimateTime = 700;
+config1.waveRiseTime = 1000;
 config1.colorsCss = true;
 config1.displayPercent = false;
 var gauge1 = loadLiquidFillGauge("fillgauge1", 0, config1);
@@ -386,9 +386,13 @@ var scatterChart = new Chart(ctx, {
 'use strict';
 
 var v;
+var noise;
 window.onload = function () {
   v = new Visualizer();
   v.ini();
+  $.get("/fftNoise", function (data) {
+    noise = JSON.parse(data);
+  });
 };
 
 var Visualizer = function Visualizer() {
@@ -595,8 +599,8 @@ Visualizer.prototype = {
   },
   _drawNoise: function _drawNoise() {
 
-    $.get("/fftNoise", function (data) {
-      var json = JSON.parse(data);
+    $.get("/fftIndex", function (data) {
+      var json = noise[data];
       var dataS = new Array(data.length);
       var i = 0;
       var keys = [];
@@ -621,6 +625,10 @@ Visualizer.prototype = {
 'use strict';
 
 function switchMode() {
+  if (!inMode2()) {
+    v._pauseNoise();
+    $('.play').removeClass('active');
+  }
   $('body').toggleClass('mode2');
 }
 
