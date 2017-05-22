@@ -260,8 +260,8 @@ function setWaterColor(value) {
 var config1 = liquidFillGaugeDefaultSettings();
 config1.circleThickness = 0.1;
 config1.circleFillGap = 0;
-config1.waveAnimateTime = 700;
-config1.waveRiseTime = 1000;
+config1.waveAnimateTime = 500;
+config1.waveRiseTime = 100;
 config1.colorsCss = true;
 config1.displayPercent = false;
 var gauge1 = loadLiquidFillGauge("fillgauge1", 0, config1);
@@ -460,8 +460,8 @@ Visualizer.prototype = {
     this._drawSpectrum(analyser_node);
   },
   _drawSpectrum: function _drawSpectrum(analyser) {
-    analyser.smoothingTimeConstant = 0.9;
-    analyser.fftSize = 4096;
+    analyser.smoothingTimeConstant = 0.8;
+    analyser.fftSize = 2048;
 
     var bufferLength = analyser.frequencyBinCount - 250;
     var dataArray = new Float32Array(bufferLength);
@@ -530,7 +530,8 @@ Visualizer.prototype = {
     this.powerOfNoise += power;
   },
   _result: function _result() {
-    this.analyser.smoothingTimeConstant = 0.9;
+    this.analyser.smoothingTimeConstant = 0.8;
+    this.powerOfNoise = 0;
     clearInterval(this.timer);
     var c50;
     if (this.powerAfter == 0) {
@@ -576,8 +577,10 @@ Visualizer.prototype = {
       }, 1);
     } else {
       if (isActive()) {
+        this.analyser.smoothingTimeConstant = 0;
         this._playNoise();
       } else {
+        this.analyser.smoothingTimeConstant = 0.8;
         this._pauseNoise();
       }
     }
