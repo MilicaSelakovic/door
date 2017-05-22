@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 import json
 import wave
-from pyaudio import PyAudio
+from pyaudio import PyAudio, paContinue
 import math
 import multiprocessing
 import threading
@@ -23,11 +23,28 @@ class Noise:
         """Init noise"""
         self.wf = wave.open("noise/noise.wav", 'rb');
         self.p = PyAudio()
+        self.fftArray = []
+        self.fft()
+        self.curentIndex = 0
+
+        def callback(in_data, frame_count, time_info, status):
+            data = self.wf.readframes(frame_count)
+            self.curentIndex += 1
+            if len(data) < 2*frame_count:
+                self.wf.rewind()
+                self.curentIndex = 0
+                data = self.wf.readframes(frame_count)
+            return (data, paContinue)
+
+
         self.stream = self.p.open(
             format = self.p.get_format_from_width(self.wf.getsampwidth()),
             channels = self.wf.getnchannels(),
             rate = self.wf.getframerate(),
-            output = True
+            output = True,
+            frames_per_buffer=self.chunk,
+            start=False,
+            stream_callback=callback
         )
         # self.process = multiprocessing.Process(self.play())
         # self.process.start()
@@ -39,7 +56,7 @@ class Noise:
             self.data = self.wf.readframes(self.chunk)
             if self.data == '':
                 self.wf.rewind()
-                self.data = self.wf.readframes(self.CHUNK)
+                self.data = self.wf.readframes(self.chunk)
             self.stream.write(self.data)
 
     def wav2array(self, nchannels, sampwidth, data):
@@ -65,17 +82,22 @@ class Noise:
         return result
 
     def fft(self):
-        self.play()
-        array = self.wav2array(self.wf.getnchannels(), self.wf.getsampwidth(), self.data)
-        fs = self.wf.getframerate()
-        ff = np.fft.fft(array)
-        freq = np.fft.fftfreq(len(array), d=1./fs)
-        ff += 0.00001 # da ne bi bio log od 0
-        ffDec = 20*np.log10(np.abs(ff[0:ff.shape[0]//2]))
-        ffDec -= np.max(ffDec)
-        freq = freq[0:len(freq)//2]
-        result = dict(zip(freq.tolist(), ffDec.tolist()));
-        return result
+        self.wf.rewind()
+        while True:
+            data = self.wf.readframes(self.chunk)
+            if len(data) < 2*self.chunk:
+                break
+            array = self.wav2array(self.wf.getnchannels(), self.wf.getsampwidth(), data)
+            fs = self.wf.getframerate()
+            ff = np.fft.fft(array)
+            freq = np.fft.fftfreq(len(array), d=1./fs)
+            ff += 0.00001 # da ne bi bio log od 0
+            ffDec = 20*np.log10(np.abs(ff[0:ff.shape[0]//2]))
+            ffDec -= np.max(ffDec)
+            freq = freq[0:len(freq)//2]
+            result = dict(zip(freq.tolist(), ffDec.tolist()));
+            self.fftArray.append(result)
+        self.wf.rewind()
 
     def setStart(self, value):
         self.start = value
@@ -85,7 +107,7 @@ class Noise:
         self.p.terminate()
 
 def play(frequency, length):
-    print(frequency);
+    print("Playing impulse at %sHz" % frequency);
     frequency = float(frequency);
     BITRATE = 16000
 
@@ -127,17 +149,24 @@ def freq():
 @app.route('/fftNoise', methods=['GET'])
 def fftNoise():
     if request.method == 'GET':
-        result = noise.fft()
-        return json.dumps(result);
+        return json.dumps(noise.fftArray);
+
+@app.route('/fftIndex', methods=['GET'])
+def fftIndex():
+    if request.method == 'GET':
+        return str(noise.curentIndex)
 
 @app.route('/startNoise')
 def startNoise():
     noise.setStart(True)
+    noise.stream.start_stream()
+    print("jebem se za pare")
     return ""
 
 @app.route('/stopNoise')
 def stopNoise():
     noise.setStart(False)
+    noise.stream.stop_stream();
     return ""
 
 
