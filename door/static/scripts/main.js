@@ -629,8 +629,8 @@ Visualizer.prototype = {
 
 function switchMode() {
   if (!inMode2()) {
-    v._pauseNoise();
     $('.play').removeClass('active');
+    v._start();
   }
   $('body').toggleClass('mode2');
 }
