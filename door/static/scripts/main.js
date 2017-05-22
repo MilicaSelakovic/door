@@ -260,8 +260,8 @@ function setWaterColor(value) {
 var config1 = liquidFillGaugeDefaultSettings();
 config1.circleThickness = 0.1;
 config1.circleFillGap = 0;
-config1.waveAnimateTime = 500;
-config1.waveRiseTime = 100;
+config1.waveAnimateTime = 700;
+config1.waveRiseTime = 1000;
 config1.colorsCss = true;
 config1.displayPercent = false;
 var gauge1 = loadLiquidFillGauge("fillgauge1", 0, config1);
