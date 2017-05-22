@@ -264,19 +264,8 @@ config1.waveAnimateTime = 500;
 config1.waveRiseTime = 100;
 config1.colorsCss = true;
 config1.displayPercent = false;
-var gauge1 = loadLiquidFillGauge("fillgauge1", 55, config1);
+var gauge1 = loadLiquidFillGauge("fillgauge1", 0, config1);
 setWaterColor(55);
-
-function NewValue() {
-  var res;
-  if (Math.random() > .5) {
-    res = Math.round(Math.random() * 100);
-  } else {
-    res = (Math.random() * 100).toFixed(1);
-  }
-  setWaterColor(Math.round(res));
-  return res;
-}
 //# sourceMappingURL=liquidConfig.js.map
 
 "use strict";
@@ -564,7 +553,7 @@ Visualizer.prototype = {
     this.powerOfNoise /= this.count;
     this.count = 0;
     var that = this;
-    console.log(sliderValue());
+    // console.log(sliderValue());
     $.ajax({
       type: "GET",
       url: "/play",
@@ -599,6 +588,10 @@ Visualizer.prototype = {
   _pauseNoise: function _pauseNoise() {
     $.get("/stopNoise");
     clearInterval(this.noiseTimer);
+    setTimeout(function () {
+      scatterChart.data.datasets[1].data = [];
+      scatterChart.update();
+    }, 10);
   },
   _drawNoise: function _drawNoise() {
 
@@ -639,9 +632,13 @@ function isActive() {
   return $('.play').hasClass('active');
 }
 
-function enablePlay() {}
+function enablePlay() {
+  $('.loader').removeClass("loader active").addClass("play");
+}
 
-function disablePlay() {}
+function disablePlay() {
+  $('.play').removeClass("play").addClass("loader");
+}
 
 function sliderValue() {
   return $("#slider")[0].noUiSlider.get();
@@ -650,12 +647,14 @@ function sliderValue() {
 $(document).ready(function () {
   var icon = $('.play');
   icon.click(function () {
-    if (!inMode2()) {
-      icon.toggleClass('active');
-    } else {
-      disablePlay();
+    if (icon.hasClass("play")) {
+      if (!inMode2()) {
+        icon.toggleClass('active');
+      } else {
+        disablePlay();
+      }
+      v._start();
     }
-    v._start();
     return false;
   });
 });
