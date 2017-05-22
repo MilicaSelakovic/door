@@ -6,7 +6,6 @@ from pyaudio import PyAudio, paContinue
 import math
 import multiprocessing
 import threading
-import struct
 import numpy as np
 import os
 
@@ -16,8 +15,6 @@ lock = multiprocessing.Lock()
 
 class Noise:
     chunk = 1024
-    start = False
-    # start = multiprocessing.Value('i', 0);
 
 
     def __init__(self):
@@ -47,18 +44,6 @@ class Noise:
             start=False,
             stream_callback=callback
         )
-        # self.process = multiprocessing.Process(self.play())
-        # self.process.start()
-
-
-    def play(self):
-        # i = 0;
-        if self.start :
-            self.data = self.wf.readframes(self.chunk)
-            if self.data == '':
-                self.wf.rewind()
-                self.data = self.wf.readframes(self.chunk)
-            self.stream.write(self.data)
 
     def wav2array(self, nchannels, sampwidth, data):
         """data must be the string containing the bytes from the wav file."""
@@ -99,9 +84,6 @@ class Noise:
             result = dict(zip(freq.tolist(), ffDec.tolist()));
             self.fftArray.append(result)
         self.wf.rewind()
-
-    def setStart(self, value):
-        self.start = value
 
     def close(self):
         self.stream.close()
@@ -159,14 +141,12 @@ def fftIndex():
 
 @app.route('/startNoise')
 def startNoise():
-    noise.setStart(True)
     noise.stream.start_stream()
     print("jebem se za pare")
     return ""
 
 @app.route('/stopNoise')
 def stopNoise():
-    noise.setStart(False)
     noise.stream.stop_stream();
     return ""
 
