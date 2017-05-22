@@ -165,7 +165,7 @@ def vendor_js():
 def main_css():
     return app.send_static_file('styles/main.css')
 
-@app.route("/app.html")
+@app.route("/")
 def app_html():
     return app.send_static_file('index.html')
 
