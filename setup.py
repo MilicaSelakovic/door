@@ -9,6 +9,7 @@ setup(
     author='Milica',
     author_email='milica1793@gmail.com',
     description='class project',
+    package_data={'' : ['noise/noise.wav']},
     install_requires=[
         'flask',
         'pyaudio',
