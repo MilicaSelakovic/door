@@ -195,6 +195,11 @@ def vendor_js():
 def main_css():
     return app.send_static_file('styles/main.css')
 
+@app.route("/favicon.ico")
+def icon():
+    return app.send_static_file('favicon.ico')
+
+@app.route("/index.html")
 @app.route("/")
 def app_html():
     return app.send_static_file('index.html')
