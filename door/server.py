@@ -8,8 +8,9 @@ import multiprocessing
 import threading
 import struct
 import numpy as np
+import os
 
-app = Flask(__name__, static_folder='./static')
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
 lock = multiprocessing.Lock()
 
@@ -21,7 +22,7 @@ class Noise:
 
     def __init__(self):
         """Init noise"""
-        self.wf = wave.open("noise/noise.wav", 'rb');
+        self.wf = wave.open(os.path.join(os.path.dirname(__file__), "noise/noise.wav"), 'rb');
         self.p = PyAudio()
         self.fftArray = []
         self.fft()
