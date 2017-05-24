@@ -72,7 +72,7 @@ class Noise:
             fs = self.wf.getframerate()
             ff = np.fft.fft(array)
             freq = np.fft.fftfreq(len(array), d=1./fs)
-            ff += 0.00001 # da ne bi bio log od 0
+            ff += 0.00001 # da ne bi desio log od 0
             ffDec = 20*np.log10(np.abs(ff[0:ff.shape[0]//2]))
             ffDec -= np.max(ffDec)
             freq = freq[0:len(freq)//2]
