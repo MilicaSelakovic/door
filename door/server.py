@@ -11,11 +11,8 @@ import os
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
-lock = multiprocessing.Lock()
-
 class Noise:
     chunk = 1024
-
 
     def __init__(self):
         """Init noise"""
@@ -46,7 +43,6 @@ class Noise:
         )
 
     def wav2array(self, nchannels, sampwidth, data):
-        """data must be the string containing the bytes from the wav file."""
         num_samples, remainder = divmod(len(data), sampwidth * nchannels)
         if remainder > 0:
             raise ValueError('The length of data is not a multiple of '
@@ -61,7 +57,6 @@ class Noise:
             a[:, :, sampwidth:] = (a[:, :, sampwidth - 1:sampwidth] >> 7) * 255
             result = a.view('<i4').reshape(a.shape[:-1])
         else:
-            # 8 bit samples are stored as unsigned ints; others as signed ints.
             dt_char = 'u' if sampwidth == 1 else 'i'
             a = np.fromstring(data, dtype='<%s%d' % (dt_char, sampwidth))
             result = a.reshape(-1, nchannels)
@@ -104,7 +99,6 @@ def play(frequency, length):
     for x in range(NUMBEROFFRAMES):
        WAVEDATA += chr(int(math.sin(x / ((BITRATE / FREQUENCY) / math.pi)) * 127 + 128))
 
-    #fill remainder of frameset with silence
     for x in range(RESTFRAMES):
         WAVEDATA += chr(128)
 
@@ -142,7 +136,6 @@ def fftIndex():
 @app.route('/startNoise')
 def startNoise():
     noise.stream.start_stream()
-    print("jebem se za pare")
     return ""
 
 @app.route('/stopNoise')
